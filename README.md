@@ -7,6 +7,7 @@
 > - `upsert_automation_config(automation_id, config)` — create or replace an automation (auto-reloads)
 > - `delete_automation_config(automation_id)` — delete an automation (auto-reloads)
 > - `reload_automations()` — reload automations from disk (wrapper around the existing service call)
+> - `call_api(method, path, body, params)` — generic REST passthrough; escape hatch for any HA endpoint not covered by a dedicated tool (templates, services list, script/scene config, events, etc.)
 >
 > **Installation:** This fork is installed from git via uvx, not from PyPI/Docker Hub. The wrapper image at [`FriendlyVoid/hass-mcp-http`](https://github.com/FriendlyVoid/hass-mcp-http) (published to `ghcr.io/friendlyvoid/hass-mcp-http`) handles supergateway + SDK-patch, and points its uvx command at this repo. See that repo's compose example.
 >
@@ -201,6 +202,7 @@ Hass-MCP provides several tools for interacting with Home Assistant:
 - `upsert_automation_config`: **(fork)** Create or replace an automation, auto-reloads
 - `delete_automation_config`: **(fork)** Delete an automation, auto-reloads
 - `reload_automations`: **(fork)** Reload automations from disk
+- `call_api`: **(fork)** Generic REST API passthrough — escape hatch for endpoints without a dedicated tool
 - `call_service_tool`: Call any Home Assistant service
 - `restart_ha`: Restart Home Assistant
 - `get_history`: Get the state history of an entity
