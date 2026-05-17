@@ -533,6 +533,55 @@ async def delete_automation_config(automation_id: str) -> Dict[str, Any]:
         "reload_result": reload_result,
     }
 
+# ---------------------------------------------------------------------------
+# Generic REST passthrough (escape hatch)
+#
+# Use when no curated helper covers the endpoint you need. Wraps any HTTP
+# method against any /api/... path, with optional JSON body and query params.
+# ---------------------------------------------------------------------------
+
+@handle_api_errors
+async def call_ha_api(
+    method: str,
+    path: str,
+    body: Optional[Dict[str, Any]] = None,
+    params: Optional[Dict[str, str]] = None,
+) -> Any:
+    """
+    Direct passthrough to the Home Assistant REST API.
+
+    Args:
+        method: HTTP method (GET, POST, PUT, DELETE, PATCH). Case-insensitive.
+        path: API path, with or without leading slash (e.g. "/api/template").
+        body: Optional JSON body for POST/PUT/PATCH.
+        params: Optional query string parameters.
+
+    Returns:
+        Parsed JSON response if the response is JSON. If the response body is
+        empty or not JSON, returns {"_status": <code>, "_text": <raw body>}.
+    """
+    client = await get_client()
+    if not path.startswith("/"):
+        path = "/" + path
+    url = f"{HA_URL}{path}"
+
+    response = await client.request(
+        method=method.upper(),
+        url=url,
+        headers=get_ha_headers(),
+        json=body if body is not None else None,
+        params=params if params else None,
+    )
+    response.raise_for_status()
+
+    if not response.content:
+        return {"_status": response.status_code, "_text": ""}
+
+    try:
+        return response.json()
+    except ValueError:
+        return {"_status": response.status_code, "_text": response.text}
+
 @handle_api_errors
 async def restart_home_assistant() -> Dict[str, Any]:
     """Restart Home Assistant"""
