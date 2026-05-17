@@ -1,3 +1,22 @@
+> **Fork notice**
+>
+> This is a fork of [voska/hass-mcp](https://github.com/voska/hass-mcp) maintained by **@FriendlyVoid**, with additional tools for editing automation configurations via the `/api/config/automation/config/{id}` REST endpoints — read, create/update, and delete the full automation YAML (trigger/condition/action/mode), not just metadata.
+>
+> **Added in this fork:**
+> - `get_automation_config(automation_id)` — fetch the full config of an automation
+> - `upsert_automation_config(automation_id, config)` — create or replace an automation (auto-reloads)
+> - `delete_automation_config(automation_id)` — delete an automation (auto-reloads)
+> - `reload_automations()` — reload automations from disk (wrapper around the existing service call)
+> - `call_api(method, path, body, params)` — generic REST passthrough; escape hatch for any HA endpoint not covered by a dedicated tool (templates, services list, script/scene config, events, etc.)
+>
+> **Installation:** This fork is installed from git via uvx, not from PyPI/Docker Hub. The wrapper image at [`FriendlyVoid/hass-mcp-http`](https://github.com/FriendlyVoid/hass-mcp-http) (published to `ghcr.io/friendlyvoid/hass-mcp-http`) handles supergateway + SDK-patch, and points its uvx command at this repo. See that repo's compose example.
+>
+> Upstream's Docker Hub / PyPI publish workflows have been removed since this fork doesn't publish to those registries. Tests still run.
+>
+> Everything below is voska's original README.
+>
+> ---
+
 # Hass-MCP
 
 A Model Context Protocol (MCP) server for Home Assistant integration with Claude and other LLMs.
@@ -179,6 +198,11 @@ Hass-MCP provides several tools for interacting with Home Assistant:
 - `search_entities_tool`: Search for entities matching a query
 - `domain_summary_tool`: Get a summary of a domain's entities
 - `list_automations`: Get a list of all automations
+- `get_automation_config`: **(fork)** Fetch the full config of an automation (trigger/condition/action/mode)
+- `upsert_automation_config`: **(fork)** Create or replace an automation, auto-reloads
+- `delete_automation_config`: **(fork)** Delete an automation, auto-reloads
+- `reload_automations`: **(fork)** Reload automations from disk
+- `call_api`: **(fork)** Generic REST API passthrough — escape hatch for endpoints without a dedicated tool
 - `call_service_tool`: Call any Home Assistant service
 - `restart_ha`: Restart Home Assistant
 - `get_history`: Get the state history of an entity
@@ -203,7 +227,6 @@ Hass-MCP provides the following resource endpoints:
 - `hass://entities/{entity_id}`: Get the state of a specific entity
 - `hass://entities/{entity_id}/detailed`: Get detailed information about an entity with all attributes
 - `hass://entities`: List all Home Assistant entities grouped by domain
-- `hass://entities/domain/{domain}`: Get a list of entities for a specific domain
 - `hass://search/{query}/{limit}`: Search for entities matching a query with custom result limit
 
 ## Development
