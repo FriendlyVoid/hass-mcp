@@ -965,7 +965,7 @@ async def delete_automation_config(automation_id: str) -> Dict[str, Any]:
 
 @mcp.tool()
 @async_handler("reload_automations")
-async def reload_automations() -> Dict[str, Any]:
+async def reload_automations() -> Any:
     """
     Reload all automations from disk without restarting Home Assistant.
 
@@ -975,7 +975,10 @@ async def reload_automations() -> Dict[str, Any]:
     those operations.
 
     Returns:
-        Result of the reload call.
+        Whatever Home Assistant returns for the service call — typically an
+        empty list ([]) for the automation.reload service. Return type is
+        intentionally Any since HA service calls don't have a guaranteed
+        response shape.
     """
     logger.info("Reloading automations")
     return await reload_automations_hass()
