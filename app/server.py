@@ -24,6 +24,8 @@ from app.hass import (
     upsert_automation_config as upsert_automation_config_hass,
     delete_automation_config as delete_automation_config_hass,
     reload_automations as reload_automations_hass,
+    # Fork addition: generic REST passthrough
+    call_ha_api as call_ha_api_hass,
 )
 
 # Type variable for generic functions
@@ -991,6 +993,57 @@ async def restart_ha() -> Dict[str, Any]:
     """
     logger.info("Restarting Home Assistant")
     return await restart_home_assistant()
+
+@mcp.tool()
+@async_handler("call_api")
+async def call_api(
+    method: str,
+    path: str,
+    body: Optional[Dict[str, Any]] = None,
+    params: Optional[Dict[str, str]] = None,
+) -> Any:
+    """
+    Direct passthrough to the Home Assistant REST API. Escape hatch for
+    endpoints not covered by a dedicated tool.
+
+    ⚠️ Prefer dedicated tools when they exist - get_entity, entity_action,
+    call_service_tool, get_automation_config, upsert_automation_config, etc.
+    Those have cleaner schemas and clearer errors. Use call_api only when
+    nothing else fits.
+
+    Args:
+        method: HTTP method - "GET", "POST", "PUT", "DELETE", or "PATCH".
+                Case-insensitive.
+        path: API path including the "/api/" prefix (leading slash optional),
+              e.g. "/api/template" or "api/config/script/config/1234567890".
+        body: Optional JSON body for POST/PUT/PATCH.
+        params: Optional dict of query string parameters.
+
+    Returns:
+        Parsed JSON response if the body is JSON. If the response is empty
+        or non-JSON, returns {"_status": <code>, "_text": <body>}.
+
+    Examples:
+        # Render a Jinja template against current state
+        call_api("POST", "/api/template",
+                 body={"template": "{{ states('sun.sun') }}"})
+
+        # List every service the HA instance exposes
+        call_api("GET", "/api/services")
+
+        # Fetch a script's full config (same shape as automations)
+        call_api("GET", "/api/config/script/config/1734567890123")
+
+        # Create/update a scene
+        call_api("POST", "/api/config/scene/config/1734567890124",
+                 body={"name": "Movie Time", "entities": {}})
+
+        # Fire a custom event
+        call_api("POST", "/api/events/my_custom_event",
+                 body={"data": "value"})
+    """
+    logger.info(f"Direct API call: {method.upper()} {path}")
+    return await call_ha_api_hass(method, path, body, params)
 
 @mcp.tool()
 @async_handler("call_service")
