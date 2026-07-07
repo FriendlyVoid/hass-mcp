@@ -9,7 +9,9 @@ venv/
 ENV/
 
 # Environment Variables
+*.env
 .env
+!.env.example
 
 # OS specific
 .DS_Store

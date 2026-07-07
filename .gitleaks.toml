@@ -1,0 +1,20 @@
+# gitleaks per-repo allowlist
+#
+# Inherits from gitleaks defaults; only overrides what's needed.
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Allow placeholders and example/documentation values"
+paths = [
+  '''(?i).*\.env\.example$''',
+  '''.*README\.md''',
+]
+regexes = [
+  '''=\s*$''',
+  '''=\s*<.*>''',
+  # Documentation placeholders for the HA long-lived access token
+  '''HA_TOKEN=YOUR_LONG_LIVED_ACCESS_TOKEN''',
+  '''(?i)YOUR[_-]LONG[_-]LIVED[_-]ACCESS[_-]TOKEN''',
+]
